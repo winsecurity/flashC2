@@ -201,7 +201,7 @@ def execute(agentname):
         CMD_INPUT[req_index]=cmd
         if cmd=="Get-SharpHoundZip":
             CMD_OUTPUT[req_index]="Trying to initiate transfer... If you get incorrect or less data, run it again"
-            time.sleep(3)
+            #time.sleep(3)
             cmdoutput = CMD_OUTPUT[req_index]
             return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
         #time.sleep(5)
