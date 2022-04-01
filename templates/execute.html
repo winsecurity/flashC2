@@ -11,21 +11,25 @@
 
             <input class="input" type="text" name="command">
             <br> <br>
-            <input class="button" type="submit">
+            <input class="button is-primary" type="submit">
 
         </form>
 
         <br>
+        <h1 class="title is-3">AD Enumeration</h1>
 <div class = "dropdown">
     <div class = "dropdown-trigger">
-       <button class = "button" aria-haspopup = "true" aria-controls = "dropdown-menu">
-          <span>Choose a command to execute</span>
+       <button class = "button is-danger is-outlined">
+          <span>Choose AD Enumeration method</span>
           <span class = "icon is-small">
              <i class = "fa fa-angle-down" aria-hidden="true"></i>
           </span>
        </button>
     </div>
+    
+    
     <div class = "dropdown-menu" id = "dropdown-menu" role = "menu">
+      
        <div class = "dropdown-content">
           <a href = "http://127.0.0.1:5000/{{name}}/execute?d=Get-SharpHoundZip" class = "dropdown-item">Get-SharpHoundZip</a>
           <a href = "http://127.0.0.1:5000/{{name}}/execute?d=Get-ASREPRoastable"  class = "dropdown-item">Get-ASREPRoastable</a>
@@ -50,9 +54,18 @@
        });
     });        
  </script>
-</div><br>
+</div><br><br>
 
-       <pre>{{ cmdoutput }}</pre> 
+<style>
+   pre{
+      background-color: black;
+      color:white;
+   }
+</style>
+
+      {% if cmdoutput %}
+      <pre>{{ cmdoutput }}</pre> 
+      {% endif %}
 
 {% endblock %}
 
