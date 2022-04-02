@@ -3,10 +3,11 @@
 {% block content %}
 
 
+</style>
 
 <br>
 <h1 class="title is-3">AD Enumeration</h1>
-<div class = "dropdown">
+<div class = "dropdown is-hoverable" id="test">
     <div class = "dropdown-trigger">
        <button class = "button" aria-haspopup = "true" aria-controls = "dropdown-menu">
           <span>Choose an Enumeration technique</span>
@@ -26,24 +27,28 @@
        </div>
     </div>
  </div>
- <script>
-    //DOMContentLoaded - it fires when initial HTML document has been completely loaded
-    document.addEventListener('DOMContentLoaded', function () {
-       // querySelector - it returns the element within the document that matches the specified selector
-       var dropdown = document.querySelector('.dropdown');
-         
-       //addEventListener - attaches an event handler to the specified element.
-       dropdown.addEventListener('click', function(event) {
-         
-          //event.stopPropagation() - it stops the bubbling of an event to parent elements, by preventing parent event handlers from being executed
-          event.stopPropagation();
-           
-          //classList.toggle - it toggles between adding and removing a class name from an element
-          dropdown.classList.toggle('is-active');
-       });
-    });        
- </script>
+ 
+ <br><br>
+
+ <h3 class="title is-3">Privesc Enumeration</h3>
+ <div class="dropdown is-hoverable">
+  
+   <div class="dropdown-trigger">
+       <button class="button" aria-haspopup="true" aria-controls="dropdown-menu4">
+           <span>Hover me</span>
+           <span class="icon is-small">
+               <i class="fas fa-angle-down" aria-hidden="true"></i>
+           </span>
+       </button>
+   </div>
+   <div class="dropdown-menu" id="dropdown-menu4" role="menu">
+      <div class = "dropdown-content">
+         <a href = "#" class = "dropdown-item">Testing</a>
+      </div>
+   </div>
 </div>
+ 
+
 
 
 {% endblock content %}

