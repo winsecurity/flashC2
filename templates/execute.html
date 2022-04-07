@@ -1,4 +1,6 @@
 {% extends 'index.html' %} 
+
+<body  onload="update_values();">
 {% block content %}
 
 
@@ -32,8 +34,9 @@
           <a href = "http://127.0.0.1:5000/{{name}}/execute?d=Get-ASREPRoastable"  class = "dropdown-item">Get-ASREPRoastable</a>
           <a href = "http://127.0.0.1:5000/{{name}}/execute?d=Get-Kerberoastable" class = "dropdown-item ">Get-Kerberoastable</a>
           <a href = "http://127.0.0.1:5000/{{name}}/execute?d=Get-GroupRecursive" class = "dropdown-item">Get-GroupRecursive</a>
-          <hr class = "dropdown-divider">
-          <a href = "#" class = "dropdown-item">South Africa</a>
+          <a href="http://127.0.0.1:5000/{{name}}/execute?d=Get-DCSyncUsers" class="dropdown-item">Get-DCSyncUsers</a>
+          
+          
        </div>
     </div>
  </div>
@@ -54,13 +57,49 @@
    <div class="dropdown-menu" id="dropdown-menu" role="menu">
       <div class = "dropdown-content">
          <a href = "http://127.0.0.1:5000/{{name}}/execute?d=powerup" class = "dropdown-item">Run PowerUp</a>
-         
+         <a href = "http://127.0.0.1:5000/{{name}}/execute?d=unquotedservices" class = "dropdown-item">Unquoted Services</a>
+
       </div>
    </div>
 </div>
 
 
 </div><br><br>
+
+
+
+<script type="text/javascript">
+   var intervalID = setInterval(update_values,2000);
+ //  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+   function update_values() {
+            //if(name.length>0){
+           $.getJSON( 'http://127.0.0.1:5000/{{name}}/stuff',
+               
+       function(data) {
+           $('#result').text(data.result);
+           
+       });
+      //}
+       };
+       
+       function stopTextColor() {
+       clearInterval(intervalID);
+       }
+
+</script>
+
+
+
+<p>
+   
+<pre><span id="result">?</span></pre>
+
+<script>
+document.getElementById("result").innerHTML;
+</script>
+<button onclick="stopTextColor();">Stop</button>
+
+
 
 <style>
    pre{
@@ -69,10 +108,11 @@
    }
 </style>
 
-      {% if cmdoutput %}
+      <!--{% if cmdoutput %}
       <pre>{{ cmdoutput }}</pre> 
-      {% endif %}
+      {% endif %}-->
 
 {% endblock %}
 
 
+</body>

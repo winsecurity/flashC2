@@ -1,0 +1,26 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<h1 class="title is-1">{{cwd}}</h1>
+
+<a href="http://127.0.0.1:5000/{{agentname}}/file-manager?data=..\">../</a>
+
+<br>
+
+{% for i in fileoutput %}
+
+{% if i[0]=='F' %}
+
+<label class="checkbox"><input type="checkbox" name="checkbox2" value={{i[-1]}}>{{i[-1]}}</label>
+<br>
+{% else %}
+
+<a href="http://127.0.0.1:5000/{{agentname}}/file-manager?data={{i[-1]}}">{{i[-1]}}</a>
+<br>
+{% endif %}
+
+
+{% endfor %}
+
+{% endblock content %}

