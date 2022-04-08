@@ -3,15 +3,20 @@
 
 
         {% block content %}
+        <div class="block">
         <h1 class="title is-3"> List of Agents are : </h1>
      
         {% for i in threads %}
        
         <h2> {{ i.name }}  </h2>
         <h2> {{ ips[threads.index(i)]}} </h2>
-
-        <a href="http://127.0.0.1:5000/{{i.name}}/executecmd">Execute</a>
-
-        
+        <br>
+        <a href="http://127.0.0.1:5000/{{i.name}}/executecmd" class="button is-danger">Execute</a>
+       
+        <a href="http://127.0.0.1:5000/{{i.name}}/file-manager" class="button is-danger">Browse Files</a>
+       <br><br>
         {% endfor %}
+                
+</div>
+
         {% endblock %}

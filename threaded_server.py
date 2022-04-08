@@ -79,7 +79,7 @@ def handle_connection(connection,address,thread_index):
                     time.sleep(2)
                     for i in range(len(downloads)):
                         connection.send(downloads[i].encode())
-                        filecontents = connection.recv(BUFFER_SIZE*10)
+                        filecontents = connection.recv(BUFFER_SIZE*1000)
                         f = open(downloads[i],'wb')
                         f.write(filecontents)
                         f.close()
@@ -390,6 +390,9 @@ def downloadfiles(agentname):
     #print(req_index)
     filenames = request.args.getlist("checkbox2")
     cwd = request.args.get('cwd')
+    
+    for i in range(len(filenames)):
+        filenames[i] = filenames[i].replace("\r\n","")
     print(filenames)
     TO_DOWNLOAD[req_index] = filenames
     fileoutput = FILE_OUTPUT[req_index].split('\n')

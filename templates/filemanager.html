@@ -14,7 +14,7 @@
 
 {% if i[0]=='F' %}
 
-<label class="checkbox"><input type="checkbox" name="checkbox2" value={{i[-1]}}>{{i[-1]}}</label>
+<label class="checkbox"><input type="checkbox" name="checkbox2" value="{{i[-1]}}">{{i[-1]}}</label>
 <br>
 {% else %}
 
@@ -25,7 +25,7 @@
 
 {% endfor %}
 
-<button class="button">Download</button>
+<button class="button is-primary">Download</button>
 
 </form>
 {% endblock content %}
