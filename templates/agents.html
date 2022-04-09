@@ -3,17 +3,19 @@
 
 
         {% block content %}
-        <div class="block">
+
+
+        
         <h1 class="title is-3"> List of Agents are : </h1>
-     
+        <div class="block has-background-primary-light ">
         {% for i in threads %}
        
-        <h2> {{ i.name }}  </h2>
-        <h2> {{ ips[threads.index(i)]}} </h2>
-        <br>
-        <a href="http://127.0.0.1:5000/{{i.name}}/executecmd" class="button is-danger">Execute</a>
+        <h2 class="title has-text-primary is-4"> {{ i.name }}  </h2>
+        <h2 class="title has-text-primary is-4" > {{ ips[threads.index(i)]}} </h2>
+        
+        <a href="http://127.0.0.1:5000/{{i.name}}/executecmd" class="button is-danger  is-outlined">Execute Commands</a>
        
-        <a href="http://127.0.0.1:5000/{{i.name}}/file-manager" class="button is-danger">Browse Files</a>
+        <a href="http://127.0.0.1:5000/{{i.name}}/file-manager" class="button is-danger is-outlined">Browse Files</a>
        <br><br>
         {% endfor %}
                 

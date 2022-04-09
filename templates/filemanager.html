@@ -1,9 +1,14 @@
 {% extends "index.html" %}
 
 {% block content %}
+<div class="block"><br>
+{% for i in cwd.split('\\') %}
 
-<h1 class="title is-1">{{cwd}}</h1>
+<a href="http://127.0.0.1:5000/{{agentname}}/file-manager?indexing={{cwd.split('\\').index(i)}}"class="button is-small is-warning">{{i}}</a>>
 
+{% endfor %}
+<br><br>
+</div>
 <form action="http://127.0.0.1:5000/{{agentname}}/downloadfiles?cwd={{cwd}}">
 
     <a href="http://127.0.0.1:5000/{{agentname}}/file-manager?data=..\">../</a>

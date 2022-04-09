@@ -361,11 +361,20 @@ def filemanager(agentname):
         if agentname in i.name:
             req_index = THREADS.index(i)
     if request.args.get('data'):
-        print("previous dir"+CWD[req_index])
-        print(str(request.args.get('data')))
+        #print("previous dir"+CWD[req_index])
+        #print(str(request.args.get('data')))
         
         FILE_INPUT[req_index] = CWD[req_index][0:-1 ]  +"\\"+ str(request.args.get('data'))
         print("latest input "+FILE_INPUT[req_index])
+    elif request.args.get('indexing'):
+        indexing = int(request.args.get('indexing'))
+        temp = CWD[req_index].split("\\")
+        path1=""
+        for i in range(0,indexing+1):
+            path1+=temp[i]+"\\"
+        print("path is "+path1)
+        CWD[req_index] = path1
+        FILE_INPUT[req_index] = path1
     else:
         FILE_INPUT[req_index]="."
     #cwd = FILE_INPUT[req_index] = "."
@@ -377,6 +386,7 @@ def filemanager(agentname):
     fileoutput = fileoutput[1:]
     for i in range(len(fileoutput)):
         fileoutput[i]=list(fileoutput[i].split("->"))
+    #print(CWD[req_index].split("\\"))
     return render_template("filemanager.html",cwd=CWD[req_index],fileoutput=fileoutput,agentname=agentname)
     #pass 
  
@@ -401,7 +411,7 @@ def downloadfiles(agentname):
     fileoutput = fileoutput[1:]
     for i in range(len(fileoutput)):
         fileoutput[i]=list(fileoutput[i].split("->"))
-    return render_template("filemanager.html",cwd=cwd,agentname=agentname,fileoutput=fileoutput)
+    return render_template("filemanager.html",cwd=CWD[req_index],agentname=agentname,fileoutput=fileoutput)
 
 
 if __name__=='__main__':
