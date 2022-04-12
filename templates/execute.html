@@ -68,8 +68,9 @@
 
 
 
-<script type="text/javascript">
+<script type="text/javascript" >
    var intervalID = setInterval(update_values,2000);
+   
  //  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
    function update_values() {
             //if(name.length>0){
@@ -83,7 +84,12 @@
        };
        
        function stopTextColor() {
-       clearInterval(intervalID);
+          alert(document.getElementById("result").innerText);
+       //   clearInterval(intervalID);
+       }
+       
+       function copy(){
+         navigator.clipboard.writeText(document.getElementById("result").innerText);
        }
 
 </script>
@@ -91,8 +97,12 @@
 
 
 <p>
-   
-<pre><span id="result">?</span></pre>
+  
+
+   <button class="button is-danger" onclick="copy();">Copy </button>  <br> <br>  
+
+<pre><p id="result">?</p></pre>
+
 
 <script>
 document.getElementById("result").innerHTML;

@@ -4,10 +4,10 @@
 <div class="block"><br>
 {% for i in cwd.split('\\') %}
 
-<a href="http://127.0.0.1:5000/{{agentname}}/file-manager?indexing={{cwd.split('\\').index(i)}}"class="button is-small is-warning">{{i}}</a>>
+<a href="http://127.0.0.1:5000/{{agentname}}/file-manager?indexing={{cwd.split('\\').index(i)}}"class="button is-outlined is-small is-primary">{{i}}</a>>
 
 {% endfor %}
-<br><br>
+<br>
 </div>
 <form action="http://127.0.0.1:5000/{{agentname}}/downloadfiles?cwd={{cwd}}">
 
