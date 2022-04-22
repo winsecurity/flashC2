@@ -1,0 +1,47 @@
+
+{% extends "index.html" %}
+
+{% block content %}
+<br>
+<p class="title is-3">Load .NET Executables</p>
+<br>
+<div class="block has-background-dark"><br>
+<p class="title is-4 has-text-white">Select .NET exe file from output folder</p>
+
+
+<form action="http://127.0.0.1:5000/{{agentname}}/loadassembly" method="POST">
+
+    <div class="file is-white ">
+        <label class="file-label">
+          <input class="file-input" type="file" name="myfiles">
+          <span class="file-cta">
+            <span class="file-icon">
+              <i class="fas fa-upload"></i>
+            </span>
+            <span class="file-label">
+              Choose a file…
+            </span>
+          </span>
+        </label>
+      </div>
+    
+      <br> 
+      &nbsp;&nbsp;&nbsp;
+      <button class="button is-white is-outlined" type="submit">Load</button>
+</form>
+<br>
+</div>  
+
+<div class="block has-background-dark"><br>
+<p class="title is-4 has-text-white">Enter URL of exe file</p>
+
+<form action="http://127.0.0.1:5000/{{agentname}}/loadassembly" method="POST">
+<input class="input is-white is-focused" style="width: 900px;" type="text" name="url" placeholder="Enter Url here"> <br><br>
+&nbsp;&nbsp;&nbsp;
+<button class="button is-white is-outlined" type="submit">Load</button><br><br>
+</form>
+</div>
+
+{% endblock content %}
+
+

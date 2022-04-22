@@ -1,0 +1,25 @@
+
+{% extends "index.html" %}
+
+
+{% block content %}
+
+<a class="button" href="http://127.0.0.1:5000/{{agentname}}/registrymanager?clear=root">Root</a> &nbsp;
+
+{% for i in path.split('\\') %}
+<a class="button" href="http://127.0.0.1:5000/{{agentname}}/registrymanager?change={{i}}">{{i}}</a>\
+{% endfor %}
+
+<br><br>
+
+{% for i in cmdoutput %}
+
+<a href="http://127.0.0.1:5000/{{agentname}}/registrymanager?d={{i}}">{{i}}</a>  <br>
+
+{% endfor %}
+
+
+
+{% endblock content %}
+
+
