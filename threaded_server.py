@@ -152,7 +152,7 @@ def handle_connection(connection,address,thread_index):
                         CMD_OUTPUT[thread_index]='File Transferred successfully'
                         CMD_INPUT[thread_index]=''
                         #break
-                    
+
                 elif CMD_INPUT[thread_index].split(" ")[0]=='upload':
                         #upload filename dest 2048
                         cmd = CMD_INPUT[thread_index]
@@ -289,7 +289,7 @@ def execute(agentname):
         counter = 0
         cmd = request.args.get('d')
         # Get-SharpHoundZip
-        #print(cmd)
+        print(cmd)
         for i in THREADS:
             if agentname in i.name:
                 req_index = THREADS.index(i)
@@ -337,7 +337,7 @@ def execute(agentname):
         #return render_template('execute.html',cmdoutput=cmdoutput,name=agentname,ips=IPS)
 
 
-#@app.route("/<agentname")
+#@app.route("/<agentname>")
 
 
 
@@ -523,6 +523,10 @@ def loadassembly(agentname):
     return render_template('loadassembly.html',agentname=agentname)
     
 
+'''@app.route("/<agentname>/injectshellcode",method=["GET","POST"])
+def injectshellcode(agentname):
+    print("hi")
+    #pass'''
 
 
 if __name__=='__main__':
