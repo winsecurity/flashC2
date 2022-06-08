@@ -340,7 +340,7 @@ def execute(agentname):
 #@app.route("/<agentname>")
 
 
-
+#testing lmao
 @app.route("/temp",methods=['GET','POST'])
 def temp():
     l =[['D',"test"],['F', 'LICENSE.txt'], ['F', 'NEWS.txt'], ['F', 'python.exe'], ['F', 'python3.dll'], ['F', 'python39.dll'], ['F', 'pythonw.exe'], ['F', 'vcruntime140.dll'], ['F', 'vcruntime140_1.dll']]
