@@ -1,0 +1,17 @@
+
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="block has-background-dark">
+
+    {% if status|length==0 %}
+    <p class="title is-2 has-text-white">Miscellaneous</p><br>
+{% else %}
+<p class="title is-2 has-text-white">{{status}}</p><br>
+{% endif %}
+
+<a href="http://127.0.0.1:5000/{{agentname}}/misc?cmd=Get-Screenshot" class="button is-white is-outlined">Get-Screenshot</a>
+<br><br><br><br>
+</div>
+{% endblock content %}
+

