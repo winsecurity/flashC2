@@ -562,8 +562,9 @@ def misc(agentname):
         status = CMD_OUTPUT[cmd_index]
         if cmd=="Get-Screenshot":
             pic=status
+            return render_template("misc.html",agentname=agentname,status=status,pic=pic)
         
-        return render_template("misc.html",agentname=agentname,status=status,pic=pic)
+        return render_template("misc.html",agentname=agentname,status=status)
 
     return render_template("misc.html",agentname=agentname)
     
