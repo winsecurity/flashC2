@@ -579,6 +579,10 @@ def injectshellcode(agentname):
     #pass'''
 
 
+@app.route("/misc")
+def misc2():
+    return render_template("misc.html")
+
 if __name__=='__main__':
     app.run(debug=True)
 
