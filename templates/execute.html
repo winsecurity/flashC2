@@ -10,10 +10,12 @@
         <form action="http://127.0.0.1:5000/{{name}}/execute" method="POST">
 
             <p class="title">Enter command : </p>
-
-            <input class="input" type="text" name="command">
+             {{command.csrf_token}}
+              {{ command.command(class="input is-dark is-outlined") }}
             <br> <br>
-            <input class="button is-primary" type="submit">
+        
+
+            <input class="button is-dark is-outlined" type="submit">
 
         </form>
 

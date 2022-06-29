@@ -1,0 +1,39 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<div class="box has-background-dark has-text-centered">
+    {{regform.csrf_token}}
+    <h1 class="title is-1  has-text-white ">Register</h1> <br>
+
+    {% if status %}
+    <p class="title is-2 has-text-white">{{ status }}</p>
+    {% endif %}
+
+<form action="#" method="POST">
+
+    <p class="title is-4 has-text-white">Choose Username</p>
+    {{regform.username(class="input",style="width: 20%")}}
+
+
+    <br><br>
+    <p class="title is-4 has-text-white">Enter Email</p>
+    {{regform.email(class="input",style="width: 20%")}}
+
+    <br><br>
+    <p class="title is-4 has-text-white">Enter Password</p>
+    {{regform.password(class="input",style="width: 20%")}}
+
+    <br><br>
+    <p class="title is-4 has-text-white">Confirm Password</p>
+    {{regform.confirm_password(class="input",style="width: 20%")}}
+
+    <br><br><br>
+    <input class="button is-white is-outlined is-large" type="submit" value="Submit">
+
+
+</form>
+
+</div>
+
+{% endblock content %}

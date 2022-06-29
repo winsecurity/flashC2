@@ -19,11 +19,29 @@
         <nav class="navbar is-dark  has-shadow is-size-2 ">
             <div class="navbar-menu ">
 
+                 
+                {% if session['name'] %}
                 <div class="navbar-start" id="nav-links">
-                    <a href="{{ url_for('home') }}" class="navbar-item">Home</a>
-                    <a href="{{ url_for('agents') }}" class="navbar-item">Agents</a>
+                  <a href="{{ url_for('home') }}" class="navbar-item">Home</a>
+                  <a href="{{ url_for('agents') }}" class="navbar-item">Agents</a>
+                  
+              </div> 
 
-                </div>  
+                <div class="navbar-end" id="nav-links">
+                  <a href="{{ url_for('logout') }}" class=" navbar-item">Logout</a>
+                  
+                </div>
+               {% else %}
+               <div class="navbar-start" id="nav-links">
+                <a href="{{ url_for('home') }}" class="navbar-item">Home</a>
+                <!--<a href="{{ url_for('agents') }}" class="navbar-item">Agents</a>
+                -->
+            </div> 
+                <div class="navbar-end" id="nav-links">
+                  <a href="{{ url_for('login') }}" class=" navbar-item">Login</a>
+                  <a href="{{ url_for('register') }}" class=" navbar-item">Register</a>
+                </div>
+                {% endif %}
 
             </div>
           </nav>

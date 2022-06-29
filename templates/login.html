@@ -1,0 +1,40 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+
+
+<div class="box has-text-centered has-background-dark">
+
+    <h1 class="title is-1  has-text-white ">Login</h1> <br>
+
+    {% if status %}
+    <h1 class="title is-3 has-text-white "> {{ status }}</h1>
+    {% endif %}
+
+<form action="#" method="POST">
+    {{form.csrf_token}}
+
+    <p class="title is-4 has-text-white">Enter Username </p>
+    {{form.username(class="input is-dark ", style="width: 20%")}}
+
+
+    <br><br>
+    <p class="title is-4 has-text-white">Enter Password</p>
+    {{form.password(class="input is-dark",style="width:20%")}}
+
+
+    <br>
+    <!--
+    <a href="#" class="button">Forgot Password?</a>-->
+
+   <br><br> <input class="button is-white is-outlined is-large" type="submit" value="Submit">
+
+
+</form>
+
+</div>
+
+{% endblock content %}
+
+
