@@ -20,7 +20,7 @@
             <div class="navbar-menu ">
 
                  
-                {% if session['name'] %}
+                {% if current_user.isauthenticated %}
                 <div class="navbar-start" id="nav-links">
                   <a href="{{ url_for('home') }}" class="navbar-item">Home</a>
                   <a href="{{ url_for('agents') }}" class="navbar-item">Agents</a>

@@ -18,6 +18,8 @@ from MyForms import *
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from Checks import *
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager,login_user,logout_user,current_user
 
 ip_address = '0.0.0.0'
 port_number = 1234
@@ -62,6 +64,13 @@ app.config["SESSION_TYPE"]="filesystem"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///databases/main.db"
 Session(app)
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return MyDBS.Login.query.get(user_id)
 
 def close_connection(connection,thread_index):
     connection.close() 
@@ -613,14 +622,26 @@ def loadpe64(agentname):
 def login():
     #if session['name']:
         #return redirect('/home')
-    if request.method=="POST":
-        username = request.form.get('username')
-        password = request.form.get('password')
-        if username=="admin" and password=="admin":
-            session['name']="admin"
-            return redirect("/home")
+    loginform = Login()
+    if request.method=="POST":  
+        username1 = request.form.get('username')
+        password1 = request.form.get('password')
+        if loginform.validate_on_submit():
+            #print("login successful")
+            userobject = MyDBS.Login.query.filter_by(username=loginform.username.data).first()
+            if userobject and bcrypt.check_password_hash(userobject.password,loginform.password.data):
+                print("login successful")
+                #current_user.isauthenticated = True
+                login_user(userobject,True)
+                #print("logged in")
+                return redirect(url_for('agents'))
+            else:
+                status = "Invalid Credentials"
+                loginform = Login()
+                return render_template("login.html",form=loginform,status=status)
         else:
-            status = "Invalid Credentials"
+            status = loginform.errors.items()
+            print(status)
             loginform = Login()
             return render_template("login.html",form=loginform,status=status)  
     loginform = Login()
@@ -630,11 +651,13 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session.pop('name')
+    logout_user()
+    
     #session.clear()
     return redirect("/home")
 
 
+import MyDBS
 @app.route("/register",methods=["GET","POST"])
 def register():
     
@@ -644,7 +667,23 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        status = Validate(username,email,password,confirm_password)
+        if registerform.validate_on_submit():
+            userexists = MyDBS.Login.query.filter_by(username=registerform.username.data).first()
+            #emailexists
+            if userexists:
+                status = "Choose another username"
+                return render_template("register.html",regform=registerform,status=status)
+            hash = bcrypt.generate_password_hash(registerform.password.data)
+            user = MyDBS.Login(username=registerform.username.data,password=hash)
+            db.session.add(user)
+            db.session.commit()
+            status = "Account Created Successfully"
+            print(status)
+        else:
+            print(registerform.errors)
+            #status = "wrong"
+            status = registerform.errors.values()
+        #status = Validate(username,email,password,confirm_password)
         return render_template("register.html",regform=registerform,status=status)
     registerform = Register()
     return render_template("register.html",regform=registerform)

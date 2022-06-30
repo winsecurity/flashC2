@@ -3,15 +3,17 @@
 {% block content %}
 
 <div class="box has-background-dark has-text-centered">
-    {{regform.csrf_token}}
+    
     <h1 class="title is-1  has-text-white ">Register</h1> <br>
 
     {% if status %}
-    <p class="title is-2 has-text-white">{{ status }}</p>
+    {% for i in status %}
+    <p class="title is-2 has-text-white">{{ i[0] }}</p>
+    {% endfor %}
     {% endif %}
 
 <form action="#" method="POST">
-
+    {{regform.csrf_token}}
     <p class="title is-4 has-text-white">Choose Username</p>
     {{regform.username(class="input",style="width: 20%")}}
 
