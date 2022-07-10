@@ -1,0 +1,70 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="box has-text-centered ">
+<div class = "dropdown is-hoverable">
+    <div class = "dropdown-trigger">
+       <button class = "button is-dark is-outlined">
+          <span>
+            {% if table_name %}
+                {{ table_name}}
+            {% else %}
+                Choose Table
+            {% endif %}
+          </span>
+          <span class = "icon is-small">
+             <i class = "fa fa-angle-down" aria-hidden="true"></i>
+          </span>
+       </button>
+    </div>
+    <div class = "dropdown-menu" id = "dropdown-menu" role = "menu">
+       <div class = "dropdown-content">
+
+            {% for i in tables %}
+
+          <a href = "{{url_for('cheatsheet',tablename=i)}}" class = "dropdown-item">{{i}}</a>
+          
+          {% endfor %}
+       </div>
+    </div>
+ </div></div>
+
+
+<div class="table-container">
+<table class="table is-bordered is-fullwidth is-hoverable is-stripped">
+
+<tbody>
+    
+    {% for i in theaders %}
+    
+    <th >{{i}}</th>
+
+    {% endfor %}
+
+
+    {% for i in data %}
+        <tr class="block has-background-dark"> 
+            
+            {% for j in i %}
+
+            <td class="has-text-white	">   
+                {% autoescape false %}
+
+               {{j|replace("\r\n","<br>")}}
+               {% endautoescape %}
+
+
+            </td>
+           
+            {% endfor %}
+        </th>  
+        </tr>
+    {% endfor %}
+
+</tbody>
+
+</table>
+</div>
+
+{% endblock content %}

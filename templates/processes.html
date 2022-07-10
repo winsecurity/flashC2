@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+{% if pname and fname and status %}
+<p class="title is-3 has-text-centered">{{status}}</p>
+<p class="title is-3 has-text-centered"> {{fname}} injected into {{pname}} </p>
+{% endif %}
+
+<div class="table-container">
+<table class="table is-bordered  is-fullwidth has-background-dark ">
+
+    <thead >
+        <th class="has-text-white">Process Name</th>
+        <th class="has-text-white">Id</th>
+        <th class="has-text-white">Main Window Title</th>
+        
+    </thead>
+    <tbody>
+{% for i in data %}
+
+<tr >
+    {% for j in i.split(",") %}
+    <td class="title  is-4 has-text-white"> {{j}}</td>
+    {% endfor %}
+</tr>
+
+<tr > <td>
+   
+<form action="{{url_for('processes',agentname=agentname,pname=i)}}" method="POST">
+    {{filefield.csrf_token}}
+     {{filefield.fileselector(class="button is-danger")}}
+    <input type="submit" class="button is-primary">
+
+</form>
+
+</td> </tr>
+
+
+{% endfor %}
+
+</tbody>
+
+</table>
+</div>
+
+{% endblock content %}
+
